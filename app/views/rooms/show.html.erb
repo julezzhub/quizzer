@@ -1,0 +1,28 @@
+<h2><%= @room.name %></h2>
+<h3>Kapazität: <%= User.where(room: @room).count %>/<%= @room.capacity %></h3>
+
+<h4>Mitglieder:</h4>
+<% User.where(room: @room).each do |user| %>
+<p>
+  <span id="ready">not ready | </span>
+  <%= user.username %>
+</p>
+<% end %>
+
+<%= button_to "Bereit?", action:"ready" %> <!-- disable button upon click! -->
+
+<% if User.where(room: @room).count >= 3 %>
+  <%= link_to "Spiel starten",  room_games_path(@room), method: :post %>
+<% else %>
+  <button>Es werden noch mindestens <%= 3 - User.where(room: @room).count %> Spieler benötigt</button>
+<% end %>
+<%= link_to "Raum verlassen", leaveroom_path %>
+
+<% content_for :after_js do %>
+  <script>
+    App['room_<%= @room.id %>'] = App.cable.subscriptions.create(
+      { channel: 'RoomsChannel', room_id: <%= @room.id %> },
+      { received: (data) => { console.log(data) }
+    })
+  </script>
+<% end %>

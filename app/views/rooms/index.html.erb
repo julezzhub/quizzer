@@ -1,0 +1,16 @@
+<h1>Willkommen, <%= @name %>!</h1>
+
+<h2>Trete einem Raum bei oder erstelle deinen eigenen Raum</h2>
+
+<h3>Du befindest dich in der Lobby.</h3>
+
+<% @rooms[1..-1].each do |room| %>
+  <p> <%= link_to room_path(room) do %>
+      <%= room.name %> | <%= User.where(room: room).count %>/<%= room.capacity %>
+      <% end %>
+  </p>
+<% end %>
+
+<%= link_to "Neuen Raum erstellen", new_room_path %>
+
+

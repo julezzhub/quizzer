@@ -24,8 +24,8 @@ Deck.create!(name:"Vol. 1")
   Question.create!(deck: Deck.find_by(name:"Vol. 1"), content: Faker::Quote.famous_last_words, solution: Faker::Beer.brand)
 end
 
-Room.create!(name:"Lobby")
-testroom = Room.create!(name:"test", capacity: 6)
+Room.create!(name:"Lobby", capacity: nil)
+testroom = Room.create!(name:"test")
 
 User.create!(email:"test@test.de", password:"testtest", username:"julez", room: Room.find_by(name:"test"))
 User.create!(email:Faker::Internet.email, password:"testtest", username:Faker::Name.first_name, room: Room.find_by(name:"test"))
@@ -52,7 +52,7 @@ end
 
 # Letting the test users bet on an answer
 Room.find_by(name:"test").users.each do |user|
-  Bet.create!(user: user, round: Room.find_by(name:"test").games.last.rounds.last, madeup_answer: MadeupAnswer.all.random)
+  Bet.create!(user: user, round: Room.find_by(name:"test").games.last.rounds.last, madeup_answer: MadeupAnswer.all.sample)
 end
 
 # Useful variables to defind in the console
