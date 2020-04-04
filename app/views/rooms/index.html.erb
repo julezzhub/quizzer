@@ -6,7 +6,7 @@
 
 <% @rooms[1..-1].each do |room| %>
   <p> <%= link_to room_path(room) do %>
-      <%= room.name %> | <%= User.where(room: room).count %>/<%= room.capacity %>
+      <%= room.name %> | <span id="room <%= room.id %>"><%= User.where(room: room).count %></span>/<%= room.capacity %>
       <% end %>
   </p>
 <% end %>
@@ -14,3 +14,15 @@
 <%= link_to "Neuen Raum erstellen", new_room_path %>
 
 
+<% content_for :after_js do %>
+  <script>
+    App['room_1 %>'] = App.cable.subscriptions.create(
+      { channel: 'RoomsChannel', room_id: 1 },
+      { received: (data) => {
+        const roomcount = document.getElementById(data['from']);
+        const newcount = parseInt(roomcount.innerText) - 1;
+        roomcount.innerText = newcount
+      }
+    })
+  </script>
+<% end %>

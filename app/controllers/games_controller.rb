@@ -16,7 +16,8 @@ class GamesController < ApplicationController
       Round.create(game: @game, question: question_set[counter])
       counter += 1
     end
+    binding.pry
 
-    redirect_to game_path(@game)
+    redirect_to room_game_path(@game)
   end
 end

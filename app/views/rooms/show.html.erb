@@ -1,19 +1,19 @@
 <h2><%= @room.name %></h2>
-<h3>Kapazität: <%= User.where(room: @room).count %>/<%= @room.capacity %></h3>
-
+<h3>Kapazität: <span id="roomcount"><%= User.where(room: @room).count %></span>/<%= @room.capacity %></h3>
 <h4>Mitglieder:</h4>
-  <% User.where(room: @room).each do |user| %>
-  <% if user.ready %>
-  <p id="<%= user.username %>" class="ready">
-    <%= user.username %>
-  </p>
-  <% else %>
-  <p id="<%= user.username %>">
-    <%= user.username %>
-  </p>
+  <div id="roomies">
+    <% User.where(room: @room).each do |user| %>
+      <% if user.ready %>
+        <p id="<%= user.username %>" class="ready">
+          <%= user.username %>
+        </p>
+      <% else %>
+        <p id="<%= user.username %>">
+          <%= user.username %>
+        </p>
+      <% end %>
   <% end %>
-<% end %>
-
+  </div>
 <%= button_to "Bereit?", {:controller => 'rooms', :action => 'ready'}, :method => :patch, remote: true %> <!-- disable button upon click! -->
 
 <% if User.where(room: @room).count >= 3 %>
@@ -29,8 +29,21 @@
     App['room_<%= @room.id %>'] = App.cable.subscriptions.create(
       { channel: 'RoomsChannel', room_id: <%= @room.id %> },
       { received: (data) => {
-        const user = document.getElementById(data['message']);
-        user.setAttribute("class", "ready");
+        const roomcount = document.getElementById("roomcount");
+        if ((data['ready'])) {
+          const user = document.getElementById(data['ready']);
+          user.setAttribute("class", "ready");
+        } else if ((data['joined'])) {
+          const roomies = document.getElementById("roomies");
+          const joined = "<p id='" + data['joined'] + "'}>" + data['joined'] +" </p>";
+          roomies.insertAdjacentHTML("beforeend", joined)
+          const newcount = parseInt(roomcount.innerText) + 1;
+          roomcount.innerText = newcount
+        } else {
+          document.getElementById(data['left']).remove();
+          const newcount = parseInt(roomcount.innerText) - 1;
+          roomcount.innerText = newcount
+        }
       }
     })
   </script>

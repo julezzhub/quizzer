@@ -7,6 +7,11 @@ class RoomsController < ApplicationController
 
   def show
     @room = Room.find(params[:id])
+    if current_user.room != @room
+      ActionCable.server.broadcast("room_#{params[:id]}", {
+        joined: current_user.username
+      })
+    end
     current_user.update(room: @room)
   end
 
@@ -24,13 +29,19 @@ class RoomsController < ApplicationController
   def ready
     current_user.update(ready: true)
     ActionCable.server.broadcast("room_#{params[:id]}", {
-      message: current_user.username
+      ready: current_user.username
     })
     redirect_to room_path(params[:id])
   end
 
   def leave_room
     current_user.update(ready: false)
+    ActionCable.server.broadcast("room_#{current_user.room.id}", {
+      left: current_user.username
+    })
+    ActionCable.server.broadcast("room_#{Room.find_by(name: "Lobby").id}", {
+      from: "room #{current_user.room.id}"
+    })
     redirect_to rooms_path
   end
 
