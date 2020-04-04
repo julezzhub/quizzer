@@ -6,6 +6,6 @@ Rails.application.routes.draw do
     resources :games, only: [:new, :create, :show]
   end
 
-  post "rooms/:id/ready", to: "rooms#ready"
+  patch "rooms/:id/ready", to: "rooms#ready"
   get "leaveroom", to: "rooms#leave_room"
 end

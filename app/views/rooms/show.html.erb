@@ -2,14 +2,19 @@
 <h3>Kapazität: <%= User.where(room: @room).count %>/<%= @room.capacity %></h3>
 
 <h4>Mitglieder:</h4>
-<% User.where(room: @room).each do |user| %>
-<p>
-  <span id="ready">not ready | </span>
-  <%= user.username %>
-</p>
+  <% User.where(room: @room).each do |user| %>
+  <% if user.ready %>
+  <p id="<%= user.username %>" class="ready">
+    <%= user.username %>
+  </p>
+  <% else %>
+  <p id="<%= user.username %>">
+    <%= user.username %>
+  </p>
+  <% end %>
 <% end %>
 
-<%= button_to "Bereit?", action:"ready" %> <!-- disable button upon click! -->
+<%= button_to "Bereit?", {:controller => 'rooms', :action => 'ready'}, :method => :patch, remote: true %> <!-- disable button upon click! -->
 
 <% if User.where(room: @room).count >= 3 %>
   <%= link_to "Spiel starten",  room_games_path(@room), method: :post %>
@@ -18,11 +23,15 @@
 <% end %>
 <%= link_to "Raum verlassen", leaveroom_path %>
 
+
 <% content_for :after_js do %>
   <script>
     App['room_<%= @room.id %>'] = App.cable.subscriptions.create(
       { channel: 'RoomsChannel', room_id: <%= @room.id %> },
-      { received: (data) => { console.log(data) }
+      { received: (data) => {
+        const user = document.getElementById(data['message']);
+        user.setAttribute("class", "ready");
+      }
     })
   </script>
 <% end %>

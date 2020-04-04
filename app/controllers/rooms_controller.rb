@@ -23,9 +23,10 @@ class RoomsController < ApplicationController
 
   def ready
     current_user.update(ready: true)
-    ActionCable.server.broadcast("room_id_#{current_user.room.id}", {
-      message: "test".to_json
+    ActionCable.server.broadcast("room_#{params[:id]}", {
+      message: current_user.username
     })
+    redirect_to room_path(params[:id])
   end
 
   def leave_room
