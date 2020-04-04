@@ -16,20 +16,32 @@
   </div>
 <%= button_to "Bereit?", {:controller => 'rooms', :action => 'ready'}, :method => :patch, remote: true %> <!-- disable button upon click! -->
 
-<% if User.where(room: @room).count >= 3 %>
-  <%= link_to "Spiel starten",  room_games_path(@room), method: :post %>
-<% else %>
-  <button>Es werden noch mindestens <%= 3 - User.where(room: @room).count %> Spieler benötigt</button>
-<% end %>
+<div id="startgame">
+
+</div>
+
 <%= link_to "Raum verlassen", leaveroom_path %>
 
 
 <% content_for :after_js do %>
   <script>
+    const roomcount = document.getElementById("roomcount");
+    const start = document.getElementById('startgame');
+    const readyPlayers = document.querySelectorAll('.ready').length
+
+    if (roomcount.innerText >= 3 && roomcount.innerText == readyPlayers) {
+      start.innerHTML = '<%= link_to "Spiel starten",  room_games_path(@room), method: :post %>'
+    } else if (roomcount.innerText >= 3) {
+      start.innerHTML = '<p> Es sind noch nicht alle Spieler bereit.</p>'
+    } else {
+      start.innerHTML = "<button>Es werden noch mindestens <%= 3 - User.where(room: @room).count %> Spieler benötigt</button>"
+    }
+
+    /* Above function should be called after any of the broadcast cases to repair current bugs - do later*/
+
     App['room_<%= @room.id %>'] = App.cable.subscriptions.create(
       { channel: 'RoomsChannel', room_id: <%= @room.id %> },
       { received: (data) => {
-        const roomcount = document.getElementById("roomcount");
         if ((data['ready'])) {
           const user = document.getElementById(data['ready']);
           user.setAttribute("class", "ready");
@@ -39,6 +51,8 @@
           roomies.insertAdjacentHTML("beforeend", joined)
           const newcount = parseInt(roomcount.innerText) + 1;
           roomcount.innerText = newcount
+        } else if ((data['start'])) {
+          window.location.href = 'http://localhost:3000/rooms/<%= @room.id %>/games/' + data['start']
         } else {
           document.getElementById(data['left']).remove();
           const newcount = parseInt(roomcount.innerText) - 1;
@@ -48,3 +62,6 @@
     })
   </script>
 <% end %>
+
+
+<!-- In later versions, only the creator of a room should be able to start a game -->

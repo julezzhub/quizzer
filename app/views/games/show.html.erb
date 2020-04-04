@@ -1,7 +1,27 @@
-<h1>Das Spiel beginnt in Kürze</h1>
+<h1>Das Spiel beginnt in <span id=""></span></h1>
 
-<%= @round_set[0].question.content %>
+<div id="question">
 
-<p>The solution is</p>
+</div>
 
-<%= @round_set[0].question.solution %>
+<div id="textfield">
+  <div id="round_count"></div>
+  <%= simple_form_for([@room, @game, @madeup_answer]) do |f| %>
+    <%= f.input :content, as: :text %>
+    <%= f.button :submit %>
+  <% end %>
+</div>
+
+<div id="answers">
+
+</div>
+
+
+<script>
+  const question = document.getElementById('question')
+  const roundCount = document.getElementById('round_count')
+
+  question.innerHTML = '<%= @round_set[0].question.content %>';
+
+  roundCount.insertAdjacentHTML('afterBegin', "<%= hidden_field_tag(name:'round', value:1) %>")
+</script>
