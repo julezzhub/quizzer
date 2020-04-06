@@ -5,6 +5,12 @@ class MadeupAnswersController < ApplicationController
     @madeup_answer = MadeupAnswer.new(user: current_user, content: @content, round: @round)
     @madeup_answer.save
 
+    ActionCable.server.broadcast("game_#{params[:game_id]}", {
+      round: params["madeup_answer"]["round_count"].to_i,
+      user: current_user,
+      content: @content
+      })
+
     redirect_to room_game_path(params[:room_id], params[:game_id])
   end
 

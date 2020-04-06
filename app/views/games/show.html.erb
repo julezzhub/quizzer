@@ -3,7 +3,7 @@
 
 </p>
 
-<p id="countdown">10</p>
+<p id="countdown"><%= @game.created_at - Time.now + 10 %></p>
 
 <div id="textfield">
   <%= simple_form_for([@room, @game, @madeup_answer], remote: true) do |f| %>
@@ -13,10 +13,10 @@
 </div>
 
 <div id="answers">
-
+  <% answers = [] %>
 </div>
 
-
+<% content_for :after_js do %>
 <script>
   const question = document.getElementById('question')
   const answers = document.getElementById('answers')
@@ -37,8 +37,19 @@
           Rails.fire(document.getElementById('new_madeup_answer'), 'submit');
           question.innerText = "Geschafft!"
           /* get solution plus all answers into a set and then randomly display each */
-          answers.innerHTML = "<% answer_set = [@round_set[" + roundCount.value + ".to_i].question.solution, MadeupAnswer.where(round: @round_set[" + roundCount.value + ".to_i])].flatten.shuffle %><% answer_set.each do |answer| %><% if answer.class == String %><p><%= answer %></p><% else %><p><%= answer.content %></p><% end %><% end %>";
-        }
+/*          answers.innerHTML = "<% answer_set = [@round_set[" + roundCount.value + ".to_i].question.solution, MadeupAnswer.where(round: @round_set[" + roundCount.value + ".to_i])].flatten.shuffle %><% answer_set.each do |answer| %><% if answer.class == String %><p><%= answer %></p><% else %><p><%= answer.content %></p><% end %><% end %>";
+*/        answers.insertAdjacentHTML('beforeend', "<% answers << @round_set[" + roundCount.value + ".to_i].question.solution %><% answers.shuffle %><% answers.each do |answer| %><p><%= answer %></p><% end %>")
+          }
       }, 1000);
     }
+  App['game_<%= @game.id %>'] = App.cable.subscriptions.create(
+    { channel: 'GamesChannel', game_id: <%= @game.id %> },
+    { received: (data) => {
+      if ((data['content'])) {
+        const joined = "<% answers << " + data['content'] + "%>"
+        answers.insertAdjacentHTML('beforeend', joined)
+      }
+    }
+  })
 </script>
+<% end %>

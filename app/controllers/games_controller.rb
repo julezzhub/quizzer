@@ -4,8 +4,6 @@ class GamesController < ApplicationController
     @game = Game.find(params[:id])
     @round_set = Round.where(game: @game)
     @madeup_answer = MadeupAnswer.new
-
-    ActionCable.server.broadcast("game_#{@game.id}", start: "Game started")
   end
 
   def create
