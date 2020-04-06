@@ -1,14 +1,14 @@
-<h1>Das Spiel beginnt in <span id=""></span></h1>
+<h2>Frage:</h2>
+<p id="question">
 
-<div id="question">
+</p>
 
-</div>
+<p id="countdown">10</p>
 
 <div id="textfield">
-  <div id="round_count"></div>
-  <%= simple_form_for([@room, @game, @madeup_answer]) do |f| %>
-    <%= f.input :content, as: :text %>
-    <%= f.button :submit %>
+  <%= simple_form_for([@room, @game, @madeup_answer], remote: true) do |f| %>
+    <%= f.input :content, as: :text, label: "Deine Antwort:" %>
+    <%= f.hidden_field :round_count, value: 0, id:"round_count" %>
   <% end %>
 </div>
 
@@ -19,9 +19,26 @@
 
 <script>
   const question = document.getElementById('question')
-  const roundCount = document.getElementById('round_count')
+  const answers = document.getElementById('answers')
+  var roundCount = document.getElementById('round_count')
 
-  question.innerHTML = '<%= @round_set[0].question.content %>';
+    question.innerHTML = '<%= @round_set[' + roundCount.value + '.to_i].question.content %>';
 
-  roundCount.insertAdjacentHTML('afterBegin', "<%= hidden_field_tag(name:'round', value:1) %>")
+    /*roundCount.value = parseInt(roundCount.value) + 1*/
+
+    var countdown = parseInt(document.getElementById('countdown').innerText);
+
+    window.onload = function() {
+      var counter = setInterval(function() {
+        countdown--;
+        document.getElementById('countdown').innerText = countdown;
+        if (countdown === 0) {
+          clearInterval(counter);
+          Rails.fire(document.getElementById('new_madeup_answer'), 'submit');
+          question.innerText = "Geschafft!"
+          /* get solution plus all answers into a set and then randomly display each */
+          answers.innerHTML = "<% answer_set = [@round_set[" + roundCount.value + ".to_i].question.solution, MadeupAnswer.where(round: @round_set[" + roundCount.value + ".to_i])].flatten.shuffle %><% answer_set.each do |answer| %><% if answer.class == String %><p><%= answer %></p><% else %><p><%= answer.content %></p><% end %><% end %>";
+        }
+      }, 1000);
+    }
 </script>

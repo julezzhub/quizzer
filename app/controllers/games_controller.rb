@@ -4,6 +4,8 @@ class GamesController < ApplicationController
     @game = Game.find(params[:id])
     @round_set = Round.where(game: @game)
     @madeup_answer = MadeupAnswer.new
+
+    ActionCable.server.broadcast("game_#{@game.id}", start: "Game started")
   end
 
   def create
@@ -19,11 +21,8 @@ class GamesController < ApplicationController
       counter += 1
     end
 
-    ActionCable.server.broadcast("room_#{params[:room_id]}", {
-      start: @game.id
-    })
+    ActionCable.server.broadcast("room_#{params[:room_id]}", start: @game.id)
 
     redirect_to room_game_path(params[:room_id], @game.id)
-
   end
 end
