@@ -7,7 +7,7 @@ class MadeupAnswersController < ApplicationController
 
     ActionCable.server.broadcast("game_#{params[:game_id]}", {
       round: params["madeup_answer"]["round_count"].to_i,
-      user: current_user,
+      user: current_user.id,
       content: @content
       })
 
