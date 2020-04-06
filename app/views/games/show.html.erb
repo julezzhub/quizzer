@@ -59,7 +59,7 @@
       })
       /* get solution plus all answers into a set and then randomly display each */
 /*          answers.innerHTML = "<% answer_set = [@round_set[" + roundCount.value + ".to_i].question.solution, MadeupAnswer.where(round: @round_set[" + roundCount.value + ".to_i])].flatten.shuffle %><% answer_set.each do |answer| %><% if answer.class == String %><p><%= answer %></p><% else %><p><%= answer.content %></p><% end %><% end %>";
-*/        answers.insertAdjacentHTML('beforeend', "<% answers << @round_set[" + roundCount.value + ".to_i].question.solution %><% answers.shuffle %><% answers.each do |answer| %><p><%= answer %></p><% end %>")
+*/        /*answers.insertAdjacentHTML('beforeend', "<% answers << @round_set[" + roundCount.value + ".to_i].question.solution %><% answers.shuffle %><% answers.each do |answer| %><p><%= answer %></p><% end %>")*/
       }
   }, 1000);
 
