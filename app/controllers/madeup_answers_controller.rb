@@ -1,4 +1,10 @@
 class MadeupAnswersController < ApplicationController
+  # def answer_set(round)
+    #@answer_set = [MadeupAnswer.where(round: round).content, round.question.solution].flatten
+    #respond_to do |format|
+      #format.html redirect_to room_game_path()
+  #end
+
   def create
     @round = Round.where(game: params[:game_id])[params["madeup_answer"]["round_count"].to_i]
     @content = params["madeup_answer"]["content"]
